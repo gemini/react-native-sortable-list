@@ -36,11 +36,9 @@ export default class SortableList extends Component {
     autoscrollAreaSize: PropTypes.number,
     rowActivationTime: PropTypes.number,
     manuallyActivateRows: PropTypes.bool,
-
     renderRow: PropTypes.func.isRequired,
     renderHeader: PropTypes.func,
     renderFooter: PropTypes.func,
-
     onChangeOrder: PropTypes.func,
     onActivateRow: PropTypes.func,
     onReleaseRow: PropTypes.func
@@ -109,7 +107,7 @@ export default class SortableList extends Component {
     const { data: prevData } = prevState;
 
     if (data && prevData && !shallowEqual(data, prevData)) {
-      this._onUpdateLayouts();
+      this.setState({ data }, this._onUpdateLayouts());
     }
   }
 
@@ -164,58 +162,6 @@ export default class SortableList extends Component {
 
       this._scroll(animated);
     }
-  }
-
-  render() {
-    let {
-      contentContainerStyle,
-      innerContainerStyle,
-      horizontal,
-      style,
-      showsVerticalScrollIndicator,
-      showsHorizontalScrollIndicator
-    } = this.props;
-    const { animated, contentHeight, contentWidth, scrollEnabled } = this.state;
-    const containerStyle = StyleSheet.flatten([
-      style,
-      { opacity: Number(animated) }
-    ]);
-    innerContainerStyle = [
-      styles.rowsContainer,
-      horizontal ? { width: contentWidth } : { height: contentHeight },
-      innerContainerStyle
-    ];
-    let { refreshControl } = this.props;
-
-    if (refreshControl && refreshControl.type === RefreshControl) {
-      refreshControl = React.cloneElement(this.props.refreshControl, {
-        enabled: scrollEnabled // fix for Android
-      });
-    }
-
-    return (
-      <View
-        style={containerStyle}
-        ref={this._onRefContainer}
-        onLayout={this._onContainerLayout}
-      >
-        <ScrollView
-          refreshControl={refreshControl}
-          ref={this._onRefScrollView}
-          horizontal={horizontal}
-          contentContainerStyle={contentContainerStyle}
-          scrollEventThrottle={2}
-          scrollEnabled={scrollEnabled}
-          showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
-          showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-          onScroll={this._onScroll}
-        >
-          {this._renderHeader()}
-          <View style={innerContainerStyle}>{this._renderRows()}</View>
-          {this._renderFooter()}
-        </ScrollView>
-      </View>
-    );
   }
 
   _renderRows() {
@@ -337,7 +283,14 @@ export default class SortableList extends Component {
 
         this.setState(
           {
-            containerLayout: { x, y, width, height, pageX, pageY },
+            containerLayout: {
+              x,
+              y,
+              width,
+              height,
+              pageX,
+              pageY
+            },
             rowsLayouts: rowsLayoutsByKey,
             headerLayout,
             footerLayout,
@@ -353,7 +306,10 @@ export default class SortableList extends Component {
   }
 
   _scroll(animated) {
-    this._scrollView.scrollTo({ ...this._contentOffset, animated });
+    this._scrollView.scrollTo({
+      ...this._contentOffset,
+      animated
+    });
   }
 
   /**
@@ -445,10 +401,7 @@ export default class SortableList extends Component {
           : (y - currentRowLayout.height <= rowTopY || currentRowIndex === 0) &&
             rowTopY <= y - currentRowLayout.height / 3)
       ) {
-        return {
-          rowKey: order[currentRowIndex],
-          rowIndex: currentRowIndex
-        };
+        return { rowKey: order[currentRowIndex], rowIndex: currentRowIndex };
       }
 
       if (
@@ -460,10 +413,7 @@ export default class SortableList extends Component {
             (rowBottomY <= y + nextRowLayout.height ||
               nextRowIndex === rowsCount - 1)
       ) {
-        return {
-          rowKey: order[nextRowIndex],
-          rowIndex: nextRowIndex
-        };
+        return { rowKey: order[nextRowIndex], rowIndex: nextRowIndex };
       }
     }
 
@@ -606,7 +556,10 @@ export default class SortableList extends Component {
       nativeEvent: { layout }
     }
   ) {
-    this._resolveRowLayout[rowKey]({ rowKey, layout });
+    this._resolveRowLayout[rowKey]({
+      rowKey,
+      layout
+    });
   }
 
   _onLayoutHeader = ({ nativeEvent: { layout } }) => {
@@ -690,6 +643,58 @@ export default class SortableList extends Component {
   _onContainerLayout = ({ nativeEvent: { layout } }) => {
     this.containerLayout = layout;
   };
+
+  render() {
+    let {
+      contentContainerStyle,
+      innerContainerStyle,
+      horizontal,
+      style,
+      showsVerticalScrollIndicator,
+      showsHorizontalScrollIndicator
+    } = this.props;
+    const { animated, contentHeight, contentWidth, scrollEnabled } = this.state;
+    const containerStyle = StyleSheet.flatten([
+      style,
+      { opacity: Number(animated) }
+    ]);
+    innerContainerStyle = [
+      styles.rowsContainer,
+      horizontal ? { width: contentWidth } : { height: contentHeight },
+      innerContainerStyle
+    ];
+    let { refreshControl } = this.props;
+
+    if (refreshControl && refreshControl.type === RefreshControl) {
+      refreshControl = React.cloneElement(this.props.refreshControl, {
+        enabled: scrollEnabled // fix for Android
+      });
+    }
+
+    return (
+      <View
+        style={containerStyle}
+        ref={this._onRefContainer}
+        onLayout={this._onContainerLayout}
+      >
+        <ScrollView
+          refreshControl={refreshControl}
+          ref={this._onRefScrollView}
+          horizontal={horizontal}
+          contentContainerStyle={contentContainerStyle}
+          scrollEventThrottle={2}
+          scrollEnabled={scrollEnabled}
+          showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
+          showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+          onScroll={this._onScroll}
+        >
+          {this._renderHeader()}
+          <View style={innerContainerStyle}>{this._renderRows()}</View>
+          {this._renderFooter()}
+        </ScrollView>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
