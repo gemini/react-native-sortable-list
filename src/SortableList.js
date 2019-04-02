@@ -104,9 +104,17 @@ export default class SortableList extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { data } = this.props;
+    const { order } = this.state;
 
-    if (data && !shallowEqual(data, prevProps.data)) {
-      this.setState({ data }, this._onUpdateLayouts());
+    if (!shallowEqual(order, prevState.order)) {
+      this._onUpdateLayouts();
+    } else if (data && !shallowEqual(data, prevState.data)) {
+      this.setState(
+        {
+          data
+        },
+        this._onUpdateLayouts()
+      );
     }
   }
 
@@ -698,7 +706,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-
   rowsContainer: {
     flex: 1,
     zIndex: 1
