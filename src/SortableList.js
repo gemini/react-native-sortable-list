@@ -103,10 +103,9 @@ export default class SortableList extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { data } = this.state;
-    const { data: prevData } = prevState;
+    const { data } = this.props;
 
-    if (data && prevData && !shallowEqual(data, prevData)) {
+    if (data && !shallowEqual(data, prevProps.data)) {
       this.setState({ data }, this._onUpdateLayouts());
     }
   }
